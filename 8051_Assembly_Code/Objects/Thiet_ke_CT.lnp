@@ -1,0 +1,3 @@
+".\Objects\Thiet_ke_CT.obj" 
+TO ".\Objects\Thiet_ke_CT" 
+PRINT(".\Listings\Thiet_ke_CT.m51") RAMSIZE(256) 

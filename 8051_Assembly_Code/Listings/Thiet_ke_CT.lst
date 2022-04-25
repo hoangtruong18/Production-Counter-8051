@@ -1,0 +1,781 @@
+A51 MACRO ASSEMBLER  THIET_KE_CT                                                          01/03/2022 22:57:42 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.2.7.0
+OBJECT MODULE PLACED IN .\Objects\Thiet_ke_CT.obj
+ASSEMBLER INVOKED BY: C:\Keil_v5\C51\BIN\A51.EXE Thiet_ke_CT.asm SET(SMALL) DEBUG PRINT(.\Listings\Thiet_ke_CT.lst) OBJE
+                      CT(.\Objects\Thiet_ke_CT.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 0000H
+  5000                 2             LED0 EQU 5000H
+  5800                 3             LED1 EQU 5800H
+  6000                 4             LED2 EQU 6000H
+  6800                 5             LED3 EQU 6800H
+0000 802E              6             JMP MAIN
+0003                   7     ORG 0003H
+0003 210D              8             JMP EX0_ISR
+0030                   9     ORG 0030H
+                      10     ;Chuong trinh chinh, chon MODE-------------------------------------------------------------
+                             -----------------------------------------------------------------
+0030                  11     MAIN:
+0030 11EB             12             CALL SET_UP_FOR_BEGINNING
+0032 317C             13             CALL MAIN_LCD
+0034                  14             MODE:
+0034 318F             15             CALL DISPLAY_STRING_MODE
+0036 7137             16             CALL KEYPAD
+0038 B42007           17             CJNE A,#20H,NEXT
+003B FF               18             MOV R7,A
+003C 31E9             19             CALL CLEAR_LCD
+003E 3184             20             CALL DISPLAY_STRING_M2
+0040 801C             21             JMP NOT_PRESS_START
+0042                  22             NEXT:
+0042 B410EF           23             CJNE A,#10H,MODE
+0045 FF               24             MOV R7,A
+                      25     ;MODE 1, nhap so lieu tu ban phim ma tran--------------------------------------------------
+                             ---------------------------------------------------------------------------------------------------- 
+0046 31E9             26             CALL CLEAR_LCD
+0048 31A0             27             CALL DISPLAY_STRING_M1
+004A 74C0             28             MOV A,#0C0H
+004C 31EE             29             CALL WRITE_COM
+004E 7830             30             MOV R0,#30H
+0050 7C04             31             MOV R4,#4
+0052                  32             KEY:
+0052 7D03             33             MOV R5,#3
+0054                  34             EXTEND:
+0054 71DE             35             CALL DELAY_100ms
+0056 DDFC             36             DJNZ R5,EXTEND
+0058 7137             37             CALL KEYPAD
+005A F6               38             MOV @R0,A
+005B 08               39             INC R0
+005C DCF4             40             DJNZ R4,KEY
+                      41     ;Xu ly chuong trinh hien thi va cac nut nhan-----------------------------------------------
+                             --------------------------------------------------------------------------------------------------------
+005E                  42     NOT_PRESS_START:
+005E 7800             43             MOV R0,#0
+0060 7900             44             MOV R1,#0
+0062 7A00             45             MOV R2,#0
+0064 7B00             46             MOV R3,#0
+0066                  47             HERE:   
+0066 20A0FD           48             JB P2.0,HERE
+0069 71DE             49             CALL DELAY_100ms
+006B 30A002           50             JNB P2.0,PRESS_START
+006E 80EE             51             JMP NOT_PRESS_START
+0070                  52     PRESS_START:    
+0070 20A002           53             JB P2.0,START
+0073 80FB             54             JMP PRESS_START
+A51 MACRO ASSEMBLER  THIET_KE_CT                                                          01/03/2022 22:57:42 PAGE     2
+
+0075                  55     START:
+0075 D2AF             56             SETB EA
+0077 D2A8             57             SETB EX0
+0079 D28C             58             SETB TR0
+007B 31E9             59             CALL CLEAR_LCD
+007D 31BC             60             CALL DISPLAY_STRING
+007F                  61     LOOP:
+007F 20B40B           62             JB P3.4,NEXT2
+0082 71EF             63             CALL DELAY_400ms
+0084 30B402           64             JNB P3.4,STILL0
+0087 8004             65             JMP NEXT2
+0089                  66             STILL0:
+0089 71EF             67             CALL DELAY_400ms
+008B 058A             68             INC TL0
+008D                  69             NEXT2:
+008D A88A             70             MOV R0,TL0
+008F 314D             71             CALL COUNT
+0091 31CD             72             CALL DISPLAY_NUMBER
+0093 3138             73             CALL DISPLAY_LED
+0095 30A102           74             JNB P2.1,CHECK
+0098 800E             75             JMP CONTINUE
+009A                  76             CHECK:
+009A                  77             HERE2:
+009A 20A1FD           78             JB P2.1,HERE2
+009D 71DE             79             CALL DELAY_100ms
+009F 30A102           80             JNB P2.1,PRESS_PAUSE
+00A2                  81     NOT_PRESS_PAUSE:
+00A2 8004             82             JMP CONTINUE
+00A4                  83     PRESS_PAUSE:
+00A4                  84     PAUSE:
+00A4 C28C             85             CLR TR0
+00A6 80B6             86             JMP NOT_PRESS_START
+00A8                  87     CONTINUE:
+00A8 EF               88             MOV A,R7
+00A9 B41016           89             CJNE A,#10H,FREE
+00AC E8               90             MOV A,R0
+00AD B53300           91             CJNE A,33H,$+3
+00B0 40CD             92             JC LOOP
+00B2 E9               93             MOV A,R1
+00B3 B532C9           94             CJNE A,32H,LOOP
+00B6 EA               95             MOV A,R2
+00B7 B531C5           96             CJNE A,31H,LOOP
+00BA EB               97             MOV A,R3
+00BB B530C1           98             CJNE A,30H,LOOP
+00BE C28C             99             CLR TR0
+00C0 8012            100             JMP BLINK
+00C2                 101             FREE:
+00C2 E8              102             MOV A,R0
+00C3 B409B9          103             CJNE A,#09H,LOOP
+00C6 E9              104             MOV A,R1
+00C7 B409B5          105             CJNE A,#09H,LOOP
+00CA EA              106             MOV A,R2
+00CB B409B1          107             CJNE A,#09H,LOOP
+00CE EB              108             MOV A,R3
+00CF B409AD          109             CJNE A,#09H,LOOP
+00D2 C28C            110             CLR TR0
+00D4                 111     BLINK:
+00D4 C2AF            112             CLR EA
+00D6 31E9            113             CALL CLEAR_LCD
+00D8 71DE            114             CALL DELAY_100ms
+00DA 31B1            115             CALL DISPLAY_STRING_END
+00DC 71DE            116             CALL DELAY_100ms
+00DE 20A2F3          117             JB P2.2,BLINK
+00E1                 118             HERE3:
+00E1 20A2FD          119             JB P2.2,HERE3
+00E4 71DE            120             CALL DELAY_100ms
+A51 MACRO ASSEMBLER  THIET_KE_CT                                                          01/03/2022 22:57:42 PAGE     3
+
+00E6 30A2FD          121             JNB P2.2,$
+00E9 0130            122             JMP MAIN
+                     123     ;Thiet lap dau chuong trinh----------------------------------------------------------------
+                             ----------------------------------------------------------------------------------------
+00EB                 124     SET_UP_FOR_BEGINNING:
+00EB                 125             CLEAR_LED:
+00EB 74FF            126             MOV A,#0FFH
+00ED 905000          127             MOV DPTR,#LED0
+00F0 F0              128             MOVX @DPTR,A
+00F1 905800          129             MOV DPTR,#LED1
+00F4 F0              130             MOVX @DPTR,A
+00F5 906000          131             MOV DPTR,#LED2
+00F8 F0              132             MOVX @DPTR,A
+00F9 906800          133             MOV DPTR,#LED3
+00FC F0              134             MOVX @DPTR,A
+00FD                 135             SET_UP:
+00FD D2A0            136             SETB P2.0
+00FF D2A1            137             SETB P2.1
+0101 D2B2            138             SETB P3.2
+0103 758915          139             MOV TMOD,#00010101B
+0106 758C00          140             MOV TH0,#0
+0109 758A00          141             MOV TL0,#0
+010C 22              142             RET
+                     143     ;Chuong trinh phuc vu ngat ngoai INT0 cho nut nhan RESET-----------------------------------
+                             ---------------------------------------------------------------------------------------------------------------------
+010D                 144     EX0_ISR:
+010D 30B2FF          145             JNB P3.2,$+2
+0110                 146             HERE1:
+0110 20B2FD          147             JB P3.2,HERE1
+0113 71DE            148             CALL DELAY_100ms
+0115                 149             WAIT_INTERRUPT:
+0115 2089FD          150             JB IE0,WAIT_INTERRUPT
+0118 7800            151             MOV R0,#0
+011A 7900            152             MOV R1,#0
+011C 7A00            153             MOV R2,#0
+011E 7B00            154             MOV R3,#0
+0120 758A00          155             MOV TL0,#0
+0123 31CD            156             CALL DISPLAY_NUMBER
+0125 740E            157             MOV A,#0EH
+0127 31EE            158             CALL WRITE_COM
+0129 7400            159             MOV A,#00H
+012B 31FB            160             CALL WRITE_TEXT
+012D 740F            161             MOV A,#0FH
+012F 31EE            162             CALL WRITE_COM
+0131 7400            163             MOV A,#00H
+0133 31FB            164             CALL WRITE_TEXT
+0135 3138            165             CALL DISPLAY_LED
+0137 32              166             RETI
+                     167     ;Chuong trinh chot LED---------------------------------------------------------------------
+                             ---------------------------------------------------------------------------------
+0138                 168     DISPLAY_LED:
+0138 E8              169             MOV A,R0
+0139 905000          170             MOV DPTR,#LED0
+013C F0              171             MOVX @DPTR,A
+013D E9              172             MOV A,R1
+013E 905800          173             MOV DPTR,#LED1
+0141 F0              174             MOVX @DPTR,A
+0142 EA              175             MOV A,R2
+0143 906000          176             MOV DPTR,#LED2
+0146 F0              177             MOVX @DPTR,A
+0147 EB              178             MOV A,R3
+0148 906800          179             MOV DPTR,#LED3
+014B F0              180             MOVX @DPTR,A
+014C 22              181             RET
+                     182     ;Chuong trinh xu ly so lieu dem duoc-------------------------------------------------------
+                             -----------------------------------------------------------------------------------------------
+A51 MACRO ASSEMBLER  THIET_KE_CT                                                          01/03/2022 22:57:42 PAGE     4
+
+014D                 183     COUNT:
+014D E8              184             MOV A,R0
+014E B40A00          185             CJNE A,#10,$+3
+0151 4027            186             JC UNITROW
+0153 B40B06          187             CJNE A,#11,NEXT1
+0156 09              188             INC R1
+0157 758A01          189             MOV TL0,#1
+015A 8007            190             JMP SKIP
+015C                 191             NEXT1:
+015C 09              192             INC R1
+015D                 193             RESET_TIMER:
+015D 758C00          194             MOV TH0,#0
+0160 758A00          195             MOV TL0,#0
+0163                 196             SKIP:
+0163 A88A            197             MOV R0,TL0
+0165 E9              198             MOV A,R1
+0166 B40A10          199             CJNE A,#10,DOZENS
+0169 7900            200             MOV R1,#0
+016B 0A              201             INC R2
+016C EA              202             MOV A,R2
+016D B40A09          203             CJNE A,#10,HUNDREDS
+0170 7A00            204             MOV R2,#0
+0172 0B              205             INC R3
+0173 EB              206             MOV A,R3
+0174 B40A02          207             CJNE A,#10,THOUSANDS
+0177 7B00            208             MOV R3,#0
+0179                 209             THOUSANDS:
+0179                 210             HUNDREDS:
+0179                 211             DOZENS:
+0179 E8              212             MOV A,R0
+017A                 213             UNITROW:
+017A F8              214             MOV R0,A
+017B 22              215             RET     
+                     216     ;Chuong trinh LCD--------------------------------------------------------------------------
+                             ----------------------------------------------------------------------------
+017C                 217     DISPLAY_LCD:
+  00B3               218             E BIT P3.3
+  00B5               219             RS BIT P3.5
+  7000               220             LCDADDR EQU 7000H
+017C                 221     MAIN_LCD:
+017C 907000          222             MOV DPTR,#LCDADDR
+017F 31DC            223             CALL INITIAL_LCD
+0181 31E9            224             CALL CLEAR_LCD
+0183 22              225             RET
+0184                 226     DISPLAY_STRING_M2:
+0184 C0E0            227             PUSH ACC
+0186 7480            228             MOV A,#80H
+0188 31EE            229             CALL WRITE_COM
+018A 7101            230             CALL DISPLAY_STRING8
+018C D0E0            231             POP ACC
+018E 22              232             RET
+018F                 233     DISPLAY_STRING_MODE:
+018F C0E0            234             PUSH ACC
+0191 7480            235             MOV A,#80H
+0193 31EE            236             CALL WRITE_COM
+0195 51B2            237             CALL DISPLAY_STRING6
+0197 74C0            238             MOV A,#0C0H
+0199 31EE            239             CALL WRITE_COM
+019B 51D9            240             CALL DISPLAY_STRING7
+019D D0E0            241             POP ACC
+019F 22              242             RET
+01A0                 243     DISPLAY_STRING_M1:
+01A0 C0E0            244             PUSH ACC
+01A2 7480            245             MOV A,#80H
+01A4 31EE            246             CALL WRITE_COM
+01A6 514C            247             CALL DISPLAY_STRING3
+A51 MACRO ASSEMBLER  THIET_KE_CT                                                          01/03/2022 22:57:42 PAGE     5
+
+01A8 74C4            248             MOV A,#0C4H
+01AA 31EE            249             CALL WRITE_COM
+01AC 5172            250             CALL DISPLAY_STRING4
+01AE D0E0            251             POP ACC
+01B0 22              252             RET
+01B1                 253     DISPLAY_STRING_END:
+01B1 C0E0            254             PUSH ACC
+01B3 7480            255             MOV A,#80H
+01B5 31EE            256             CALL WRITE_COM
+01B7 518F            257             CALL DISPLAY_STRING5
+01B9 D0E0            258             POP ACC
+01BB 22              259             RET
+01BC                 260     DISPLAY_STRING:
+01BC C0E0            261             PUSH ACC
+01BE 7480            262             MOV A,#80H
+01C0 31EE            263             CALL WRITE_COM
+01C2 5108            264             CALL DISPLAY_STRING1
+01C4 74C0            265             MOV A,#0C0H
+01C6 31EE            266             CALL WRITE_COM
+01C8 512B            267             CALL DISPLAY_STRING2
+01CA D0E0            268             POP ACC
+01CC 22              269             RET
+01CD                 270     DISPLAY_NUMBER:
+01CD C0E0            271             PUSH ACC
+01CF 74CA            272             MOV A,#0CAH
+01D1 31EE            273             CALL WRITE_COM
+01D3 7122            274             CALL SHOW_NUMBER
+01D5 740C            275             MOV A,#0CH
+01D7 31EE            276             CALL WRITE_COM
+01D9 D0E0            277             POP ACC
+01DB 22              278             RET
+01DC                 279     INITIAL_LCD: 
+01DC 7438            280             MOV A,#38H
+01DE 31EE            281             CALL WRITE_COM
+01E0 740C            282             MOV A,#0CH
+01E2 31EE            283             CALL WRITE_COM
+01E4 7406            284             MOV A,#06H
+01E6 31EE            285             CALL WRITE_COM
+01E8 22              286             RET
+01E9                 287     CLEAR_LCD:
+01E9 7401            288             MOV A,#01H
+01EB 31EE            289             CALL WRITE_COM
+01ED 22              290             RET
+01EE                 291     WRITE_COM:
+01EE 907000          292             MOV DPTR,#LCDADDR
+01F1 D2B3            293             SETB E
+01F3 C2B5            294             CLR RS
+01F5 F0              295             MOVX @DPTR,A
+01F6 C2B3            296             CLR E
+01F8 71CD            297             CALL DELAY_1ms
+01FA 22              298             RET
+01FB                 299     WRITE_TEXT:
+01FB 907000          300             MOV DPTR,#LCDADDR
+01FE D2B3            301             SETB E
+0200 D2B5            302             SETB RS
+0202 F0              303             MOVX @DPTR,A
+0203 C2B3            304             CLR E
+0205 71CD            305             CALL DELAY_1ms
+0207 22              306             RET
+0208                 307     DISPLAY_STRING1:
+0208 C000            308             PUSH 00H
+020A C0E0            309             PUSH ACC
+020C 7800            310             MOV R0,#0
+020E                 311             LOOP1:
+020E 90021F          312             MOV DPTR,#STRING1
+0211 E8              313             MOV A,R0
+A51 MACRO ASSEMBLER  THIET_KE_CT                                                          01/03/2022 22:57:42 PAGE     6
+
+0212 93              314             MOVC A,@A+DPTR
+0213 6005            315             JZ EXIT1
+0215 31FB            316             CALL WRITE_TEXT
+0217 08              317             INC R0
+0218 80F4            318             JMP LOOP1
+021A                 319             EXIT1:
+021A D0E0            320             POP ACC
+021C D000            321             POP 00H
+021E 22              322             RET
+021F 54656E3A        323             STRING1: DB "Ten: Mi goi",0
+0223 204D6920                
+0227 676F6900                
+022B                 324     DISPLAY_STRING2:
+022B C000            325             PUSH 00H
+022D C0E0            326             PUSH ACC
+022F 7800            327             MOV R0,#0
+0231                 328             LOOP2:
+0231 900242          329             MOV DPTR,#STRING2
+0234 E8              330             MOV A,R0
+0235 93              331             MOVC A,@A+DPTR
+0236 6005            332             JZ EXIT2
+0238 31FB            333             CALL WRITE_TEXT
+023A 08              334             INC R0
+023B 80F4            335             JMP LOOP2
+023D                 336             EXIT2:
+023D D0E0            337             POP ACC
+023F D000            338             POP 00H
+0241 22              339             RET
+0242 536F206C        340             STRING2: DB "So luong:",0
+0246 756F6E67                
+024A 3A00                    
+024C                 341     DISPLAY_STRING3:
+024C C000            342             PUSH 00H
+024E C0E0            343             PUSH ACC
+0250 7800            344             MOV R0,#0
+0252                 345             LOOP3:
+0252 900263          346             MOV DPTR,#STRING3
+0255 E8              347             MOV A,R0
+0256 93              348             MOVC A,@A+DPTR
+0257 6005            349             JZ EXIT3
+0259 31FB            350             CALL WRITE_TEXT
+025B 08              351             INC R0
+025C 80F4            352             JMP LOOP3
+025E                 353             EXIT3:
+025E D0E0            354             POP ACC
+0260 D000            355             POP 00H
+0262 22              356             RET
+0263 4E686170        357             STRING3: DB "Nhap so luong:",0  
+0267 20736F20                
+026B 6C756F6E                
+026F 673A00                  
+0272                 358     DISPLAY_STRING4:
+0272 C000            359             PUSH 00H
+0274 C0E0            360             PUSH ACC
+0276 7800            361             MOV R0,#0
+0278                 362             LOOP4:
+0278 900289          363             MOV DPTR,#STRING4
+027B E8              364             MOV A,R0
+027C 93              365             MOVC A,@A+DPTR
+027D 6005            366             JZ EXIT4
+027F 31FB            367             CALL WRITE_TEXT
+0281 08              368             INC R0
+0282 80F4            369             JMP LOOP4
+0284                 370             EXIT4:
+0284 D0E0            371             POP ACC
+0286 D000            372             POP 00H
+A51 MACRO ASSEMBLER  THIET_KE_CT                                                          01/03/2022 22:57:42 PAGE     7
+
+0288 22              373             RET
+0289 2F393939        374             STRING4: DB "/9999",0   
+028D 3900                    
+028F                 375     DISPLAY_STRING5:
+028F C000            376             PUSH 00H
+0291 C0E0            377             PUSH ACC
+0293 7800            378             MOV R0,#0
+0295                 379             LOOP5:
+0295 9002A6          380             MOV DPTR,#STRING5
+0298 E8              381             MOV A,R0
+0299 93              382             MOVC A,@A+DPTR
+029A 6005            383             JZ EXIT5
+029C 31FB            384             CALL WRITE_TEXT
+029E 08              385             INC R0
+029F 80F4            386             JMP LOOP5
+02A1                 387             EXIT5:
+02A1 D0E0            388             POP ACC
+02A3 D000            389             POP 00H
+02A5 22              390             RET
+02A6 44612064        391             STRING5: DB "Da dem du! ",0     
+02AA 656D2064                
+02AE 75212000                
+02B2                 392     DISPLAY_STRING6:
+02B2 C000            393             PUSH 00H
+02B4 C0E0            394             PUSH ACC
+02B6 7800            395             MOV R0,#0
+02B8                 396             LOOP6:
+02B8 9002C9          397             MOV DPTR,#STRING6
+02BB E8              398             MOV A,R0
+02BC 93              399             MOVC A,@A+DPTR
+02BD 6005            400             JZ EXIT6
+02BF 31FB            401             CALL WRITE_TEXT
+02C1 08              402             INC R0
+02C2 80F4            403             JMP LOOP6
+02C4                 404             EXIT6:
+02C4 D0E0            405             POP ACC
+02C6 D000            406             POP 00H
+02C8 22              407             RET
+02C9 4D6F6920        408             STRING6: DB "Moi chon che do",0
+02CD 63686F6E                
+02D1 20636865                
+02D5 20646F00                
+02D9                 409     DISPLAY_STRING7:
+02D9 C000            410             PUSH 00H
+02DB C0E0            411             PUSH ACC
+02DD 7800            412             MOV R0,#0
+02DF                 413             LOOP7:
+02DF 9002F0          414             MOV DPTR,#STRING7
+02E2 E8              415             MOV A,R0
+02E3 93              416             MOVC A,@A+DPTR
+02E4 6005            417             JZ EXIT7
+02E6 31FB            418             CALL WRITE_TEXT
+02E8 08              419             INC R0
+02E9 80F4            420             JMP LOOP7
+02EB                 421             EXIT7:
+02EB D0E0            422             POP ACC
+02ED D000            423             POP 00H
+02EF 22              424             RET
+02F0 4D6F6465        425             STRING7: DB "Mode: M1 hoac M2",0
+02F4 3A204D31                
+02F8 20686F61                
+02FC 63204D32                
+0300 00                      
+0301                 426     DISPLAY_STRING8:
+0301 C000            427             PUSH 00H
+0303 C0E0            428             PUSH ACC
+A51 MACRO ASSEMBLER  THIET_KE_CT                                                          01/03/2022 22:57:42 PAGE     8
+
+0305 7800            429             MOV R0,#0
+0307                 430             LOOP8:
+0307 900318          431             MOV DPTR,#STRING8
+030A E8              432             MOV A,R0
+030B 93              433             MOVC A,@A+DPTR
+030C 6005            434             JZ EXIT8
+030E 31FB            435             CALL WRITE_TEXT
+0310 08              436             INC R0
+0311 80F4            437             JMP LOOP8
+0313                 438             EXIT8:
+0313 D0E0            439             POP ACC
+0315 D000            440             POP 00H
+0317 22              441             RET
+0318 44656D20        442             STRING8: DB "Dem tu do",0
+031C 74752064                
+0320 6F00                    
+0322                 443     SHOW_NUMBER:
+0322 EB              444             MOV A,R3
+0323 2430            445             ADD A,#30H
+0325 31FB            446             CALL WRITE_TEXT
+0327 EA              447             MOV A,R2
+0328 2430            448             ADD A,#30H
+032A 31FB            449             CALL WRITE_TEXT
+032C E9              450             MOV A,R1
+032D 2430            451             ADD A,#30H
+032F 31FB            452             CALL WRITE_TEXT
+0331 E8              453             MOV A,R0
+0332 2430            454             ADD A,#30H
+0334 31FB            455             CALL WRITE_TEXT
+0336 22              456             RET
+                     457     ;Chuong trinh ban phim ma tran-------------------------------------------------------------
+                             ------------------------------------------------------------------------------------------
+0337                 458     KEYPAD:
+0337 7590FF          459             MOV P1,#0FFH
+033A                 460     MAIN2:
+033A 74EF            461             MOV A,#11101111B
+033C 7904            462             MOV R1,#4
+033E                 463             RETURN:
+033E F590            464             MOV P1,A
+0340 23              465             RL A
+0341 209005          466             JB P1.0,PASS1
+0344 71DE            467             CALL DELAY_100ms
+0346 30901C          468             JNB P1.0,ROW0
+0349                 469             PASS1:
+0349 209105          470             JB P1.1,PASS2
+034C 71DE            471             CALL DELAY_100ms
+034E 309120          472             JNB P1.1,ROW1
+0351                 473             PASS2:
+0351 209205          474             JB P1.2,PASS3
+0354 71DE            475             CALL DELAY_100ms
+0356 309224          476             JNB P1.2,ROW2
+0359                 477             PASS3:
+0359 209305          478             JB P1.3,PASS4
+035C 71DE            479             CALL DELAY_100ms
+035E 309328          480             JNB P1.3,ROW3
+0361                 481             PASS4:
+0361 D9DB            482             DJNZ R1,RETURN
+0363 80D5            483             JMP MAIN2
+0365                 484     ROW0: 
+0365 30944B          485             JNB P1.4,NUMBER7
+0368 30954C          486             JNB P1.5,NUMBER8
+036B 30964D          487             JNB P1.6,NUMBER9
+036E 30974E          488             JNB P1.7,M1
+0371                 489     ROW1:
+0371 309433          490             JNB P1.4,NUMBER4
+0374 309534          491             JNB P1.5,NUMBER5
+A51 MACRO ASSEMBLER  THIET_KE_CT                                                          01/03/2022 22:57:42 PAGE     9
+
+0377 309635          492             JNB P1.6,NUMBER6
+037A 309746          493             JNB P1.7,M2
+037D                 494     ROW2:
+037D 30941B          495             JNB P1.4,NUMBER1
+0380 30951C          496             JNB P1.5,NUMBER2
+0383 30961D          497             JNB P1.6,NUMBER3
+0386 309743          498             JNB P1.7,ENDING
+0389                 499     ROW3:
+0389 309440          500             JNB P1.4,ENDING
+038C 309508          501             JNB P1.5,NUMBER0
+038F 30963A          502             JNB P1.6,ENDING
+0392 309737          503             JNB P1.7,ENDING
+0395 80FE            504             JMP $
+0397 7430            505             NUMBER0: MOV A,#30H
+0399 802C            506             JMP OUT
+039B 7431            507             NUMBER1: MOV A,#31H
+039D 8028            508             JMP OUT
+039F 7432            509             NUMBER2: MOV A,#32H
+03A1 8024            510             JMP OUT
+03A3 7433            511             NUMBER3: MOV A,#33H
+03A5 8020            512             JMP OUT
+03A7 7434            513             NUMBER4: MOV A,#34H
+03A9 801C            514             JMP OUT
+03AB 7435            515             NUMBER5: MOV A,#35H
+03AD 8018            516             JMP OUT
+03AF 7436            517             NUMBER6: MOV A,#36H
+03B1 8014            518             JMP OUT
+03B3 7437            519             NUMBER7: MOV A,#37H
+03B5 8010            520             JMP OUT
+03B7 7438            521             NUMBER8: MOV A,#38H
+03B9 800C            522             JMP OUT
+03BB 7439            523             NUMBER9: MOV A,#39H
+03BD 8008            524             JMP OUT
+03BF 7410            525             M1: MOV A,#10H
+03C1 8009            526             JMP ENDING
+03C3 7420            527             M2: MOV A,#20H
+03C5 8005            528             JMP ENDING
+03C7                 529     OUT:
+03C7 31FB            530             CALL WRITE_TEXT
+03C9 C3              531             CLR C
+03CA 9430            532             SUBB A,#30H
+03CC                 533     ENDING:
+03CC 22              534             RET
+                     535     ;Chuong trinh DELAY------------------------------------------------------------------------
+                             ------------------------------------------------------------------------------
+03CD                 536     DELAY_1ms:
+03CD C007            537             PUSH 07H
+03CF C006            538             PUSH 06H
+03D1 7E02            539             MOV R6,#2
+03D3                 540             AGAIN:  
+03D3 7FFA            541             MOV R7,#250
+03D5 DFFE            542             DJNZ R7,$
+03D7 DEFA            543             DJNZ R6,AGAIN
+03D9 D006            544             POP 06H
+03DB D007            545             POP 07H
+03DD 22              546             RET
+03DE                 547     DELAY_100ms: 
+03DE C007            548             PUSH 07H
+03E0 C006            549             PUSH 06H
+03E2 7FC8            550             MOV R7,#200
+03E4                 551             AGAIN1: 
+03E4 7EFA            552             MOV R6,#250
+03E6 DEFE            553             DJNZ R6,$
+03E8 DFFA            554             DJNZ R7,AGAIN1
+03EA D006            555             POP 06H
+03EC D007            556             POP 07H
+A51 MACRO ASSEMBLER  THIET_KE_CT                                                          01/03/2022 22:57:42 PAGE    10
+
+03EE 22              557             RET
+03EF                 558     DELAY_400ms:
+03EF C006            559             PUSH 06H
+03F1 7E08            560             MOV R6,#8
+03F3                 561             RETURN1:
+03F3 758D3C          562             MOV TH1,#HIGH(-50000)
+03F6 758BB0          563             MOV TL1,#LOW(-50000)
+03F9 D28E            564             SETB TR1
+03FB 308FFD          565             WAIT: JNB TF1,WAIT
+03FE C28E            566             CLR TR1
+0400 C28F            567             CLR TF1
+0402 DEEF            568             DJNZ R6,RETURN1
+0404 D006            569             POP 06H
+0406 22              570             RET
+                     571     END
+A51 MACRO ASSEMBLER  THIET_KE_CT                                                          01/03/2022 22:57:42 PAGE    11
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E               T Y P E  V A L U E   ATTRIBUTES
+
+ACC. . . . . . . . .  D ADDR   00E0H   A   
+AGAIN. . . . . . . .  C ADDR   03D3H   A   
+AGAIN1 . . . . . . .  C ADDR   03E4H   A   
+BLINK. . . . . . . .  C ADDR   00D4H   A   
+CHECK. . . . . . . .  C ADDR   009AH   A   
+CLEAR_LCD. . . . . .  C ADDR   01E9H   A   
+CLEAR_LED. . . . . .  C ADDR   00EBH   A   
+CONTINUE . . . . . .  C ADDR   00A8H   A   
+COUNT. . . . . . . .  C ADDR   014DH   A   
+DELAY_100MS. . . . .  C ADDR   03DEH   A   
+DELAY_1MS. . . . . .  C ADDR   03CDH   A   
+DELAY_400MS. . . . .  C ADDR   03EFH   A   
+DISPLAY_LCD. . . . .  C ADDR   017CH   A   
+DISPLAY_LED. . . . .  C ADDR   0138H   A   
+DISPLAY_NUMBER . . .  C ADDR   01CDH   A   
+DISPLAY_STRING . . .  C ADDR   01BCH   A   
+DISPLAY_STRING1. . .  C ADDR   0208H   A   
+DISPLAY_STRING2. . .  C ADDR   022BH   A   
+DISPLAY_STRING3. . .  C ADDR   024CH   A   
+DISPLAY_STRING4. . .  C ADDR   0272H   A   
+DISPLAY_STRING5. . .  C ADDR   028FH   A   
+DISPLAY_STRING6. . .  C ADDR   02B2H   A   
+DISPLAY_STRING7. . .  C ADDR   02D9H   A   
+DISPLAY_STRING8. . .  C ADDR   0301H   A   
+DISPLAY_STRING_END .  C ADDR   01B1H   A   
+DISPLAY_STRING_M1. .  C ADDR   01A0H   A   
+DISPLAY_STRING_M2. .  C ADDR   0184H   A   
+DISPLAY_STRING_MODE.  C ADDR   018FH   A   
+DOZENS . . . . . . .  C ADDR   0179H   A   
+E. . . . . . . . . .  B ADDR   00B0H.3 A   
+EA . . . . . . . . .  B ADDR   00A8H.7 A   
+ENDING . . . . . . .  C ADDR   03CCH   A   
+EX0. . . . . . . . .  B ADDR   00A8H.0 A   
+EX0_ISR. . . . . . .  C ADDR   010DH   A   
+EXIT1. . . . . . . .  C ADDR   021AH   A   
+EXIT2. . . . . . . .  C ADDR   023DH   A   
+EXIT3. . . . . . . .  C ADDR   025EH   A   
+EXIT4. . . . . . . .  C ADDR   0284H   A   
+EXIT5. . . . . . . .  C ADDR   02A1H   A   
+EXIT6. . . . . . . .  C ADDR   02C4H   A   
+EXIT7. . . . . . . .  C ADDR   02EBH   A   
+EXIT8. . . . . . . .  C ADDR   0313H   A   
+EXTEND . . . . . . .  C ADDR   0054H   A   
+FREE . . . . . . . .  C ADDR   00C2H   A   
+HERE . . . . . . . .  C ADDR   0066H   A   
+HERE1. . . . . . . .  C ADDR   0110H   A   
+HERE2. . . . . . . .  C ADDR   009AH   A   
+HERE3. . . . . . . .  C ADDR   00E1H   A   
+HUNDREDS . . . . . .  C ADDR   0179H   A   
+IE0. . . . . . . . .  B ADDR   0088H.1 A   
+INITIAL_LCD. . . . .  C ADDR   01DCH   A   
+KEY. . . . . . . . .  C ADDR   0052H   A   
+KEYPAD . . . . . . .  C ADDR   0337H   A   
+LCDADDR. . . . . . .  N NUMB   7000H   A   
+LED0 . . . . . . . .  N NUMB   5000H   A   
+LED1 . . . . . . . .  N NUMB   5800H   A   
+LED2 . . . . . . . .  N NUMB   6000H   A   
+LED3 . . . . . . . .  N NUMB   6800H   A   
+LOOP . . . . . . . .  C ADDR   007FH   A   
+LOOP1. . . . . . . .  C ADDR   020EH   A   
+A51 MACRO ASSEMBLER  THIET_KE_CT                                                          01/03/2022 22:57:42 PAGE    12
+
+LOOP2. . . . . . . .  C ADDR   0231H   A   
+LOOP3. . . . . . . .  C ADDR   0252H   A   
+LOOP4. . . . . . . .  C ADDR   0278H   A   
+LOOP5. . . . . . . .  C ADDR   0295H   A   
+LOOP6. . . . . . . .  C ADDR   02B8H   A   
+LOOP7. . . . . . . .  C ADDR   02DFH   A   
+LOOP8. . . . . . . .  C ADDR   0307H   A   
+M1 . . . . . . . . .  C ADDR   03BFH   A   
+M2 . . . . . . . . .  C ADDR   03C3H   A   
+MAIN . . . . . . . .  C ADDR   0030H   A   
+MAIN2. . . . . . . .  C ADDR   033AH   A   
+MAIN_LCD . . . . . .  C ADDR   017CH   A   
+MODE . . . . . . . .  C ADDR   0034H   A   
+NEXT . . . . . . . .  C ADDR   0042H   A   
+NEXT1. . . . . . . .  C ADDR   015CH   A   
+NEXT2. . . . . . . .  C ADDR   008DH   A   
+NOT_PRESS_PAUSE. . .  C ADDR   00A2H   A   
+NOT_PRESS_START. . .  C ADDR   005EH   A   
+NUMBER0. . . . . . .  C ADDR   0397H   A   
+NUMBER1. . . . . . .  C ADDR   039BH   A   
+NUMBER2. . . . . . .  C ADDR   039FH   A   
+NUMBER3. . . . . . .  C ADDR   03A3H   A   
+NUMBER4. . . . . . .  C ADDR   03A7H   A   
+NUMBER5. . . . . . .  C ADDR   03ABH   A   
+NUMBER6. . . . . . .  C ADDR   03AFH   A   
+NUMBER7. . . . . . .  C ADDR   03B3H   A   
+NUMBER8. . . . . . .  C ADDR   03B7H   A   
+NUMBER9. . . . . . .  C ADDR   03BBH   A   
+OUT. . . . . . . . .  C ADDR   03C7H   A   
+P1 . . . . . . . . .  D ADDR   0090H   A   
+P2 . . . . . . . . .  D ADDR   00A0H   A   
+P3 . . . . . . . . .  D ADDR   00B0H   A   
+PASS1. . . . . . . .  C ADDR   0349H   A   
+PASS2. . . . . . . .  C ADDR   0351H   A   
+PASS3. . . . . . . .  C ADDR   0359H   A   
+PASS4. . . . . . . .  C ADDR   0361H   A   
+PAUSE. . . . . . . .  C ADDR   00A4H   A   
+PRESS_PAUSE. . . . .  C ADDR   00A4H   A   
+PRESS_START. . . . .  C ADDR   0070H   A   
+RESET_TIMER. . . . .  C ADDR   015DH   A   
+RETURN . . . . . . .  C ADDR   033EH   A   
+RETURN1. . . . . . .  C ADDR   03F3H   A   
+ROW0 . . . . . . . .  C ADDR   0365H   A   
+ROW1 . . . . . . . .  C ADDR   0371H   A   
+ROW2 . . . . . . . .  C ADDR   037DH   A   
+ROW3 . . . . . . . .  C ADDR   0389H   A   
+RS . . . . . . . . .  B ADDR   00B0H.5 A   
+SET_UP . . . . . . .  C ADDR   00FDH   A   
+SET_UP_FOR_BEGINNING  C ADDR   00EBH   A   
+SHOW_NUMBER. . . . .  C ADDR   0322H   A   
+SKIP . . . . . . . .  C ADDR   0163H   A   
+START. . . . . . . .  C ADDR   0075H   A   
+STILL0 . . . . . . .  C ADDR   0089H   A   
+STRING1. . . . . . .  C ADDR   021FH   A   
+STRING2. . . . . . .  C ADDR   0242H   A   
+STRING3. . . . . . .  C ADDR   0263H   A   
+STRING4. . . . . . .  C ADDR   0289H   A   
+STRING5. . . . . . .  C ADDR   02A6H   A   
+STRING6. . . . . . .  C ADDR   02C9H   A   
+STRING7. . . . . . .  C ADDR   02F0H   A   
+STRING8. . . . . . .  C ADDR   0318H   A   
+TF1. . . . . . . . .  B ADDR   0088H.7 A   
+TH0. . . . . . . . .  D ADDR   008CH   A   
+TH1. . . . . . . . .  D ADDR   008DH   A   
+THOUSANDS. . . . . .  C ADDR   0179H   A   
+TL0. . . . . . . . .  D ADDR   008AH   A   
+A51 MACRO ASSEMBLER  THIET_KE_CT                                                          01/03/2022 22:57:42 PAGE    13
+
+TL1. . . . . . . . .  D ADDR   008BH   A   
+TMOD . . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . . .  B ADDR   0088H.4 A   
+TR1. . . . . . . . .  B ADDR   0088H.6 A   
+UNITROW. . . . . . .  C ADDR   017AH   A   
+WAIT . . . . . . . .  C ADDR   03FBH   A   
+WAIT_INTERRUPT . . .  C ADDR   0115H   A   
+WRITE_COM. . . . . .  C ADDR   01EEH   A   
+WRITE_TEXT . . . . .  C ADDR   01FBH   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)
