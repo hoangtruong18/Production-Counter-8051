@@ -2,7 +2,10 @@
 Extra Project for Microcontroller/Microprocessor Subject
 
 Viết CT đếm sản phẩm hiển thị giá trị lên led 7 đoạn (tối đa 9999), các thông số về sản phẩm được hiển thị lên LCD (ví dụ như tên sản phẩm, số lượng..).
-Dùng nguồn xung để giả lập cho tín hiệu xung từ ngõ ra của mạch cảm biến phát hiện sản phẩm. 
+Dùng nguồn xung để giả lập cho tín hiệu xung từ ngõ ra của mạch cảm biến phát hiện sản phẩm.
+
+Các ngoại vi trong sơ đồ mạch và phân vùng địa chỉ
+![image](https://user-images.githubusercontent.com/104365389/165119026-9499ebb3-88e6-4c43-b55a-fd5c93c3896b.png)
 
 Các phím chức năng:
 - START (P2.0): Bắt đầu đếm hoặc tiếp tục đếm (nếu như nút PAUSE được nhấn trước đó) khi quét hết chiều dài của 1 sản phẩm.
