@@ -25,7 +25,9 @@ Ghi chú:
 
 ![image](https://user-images.githubusercontent.com/104365389/165110521-21f12d89-8b8c-4b11-80c9-7e28a6cedfe2.png)
           Nhập số lượng sản phẩm cần đếm cho MODE 1.
-          
+
+![image](https://user-images.githubusercontent.com/104365389/165448228-7c5b1184-a0ad-4838-b5e2-eec4170622f5.png)
+
 ![image](https://user-images.githubusercontent.com/104365389/165110646-790ddbf8-b076-4dd5-a07e-1300243f3993.png)
           Đã đếm đủ sản phẩm. (Chiều dài sản phẩm được giả định là thời gian chân P3.4 ở mức 0 trong 0,2s)
 
